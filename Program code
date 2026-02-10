@@ -1,0 +1,57 @@
+pip install pandas numpy scikit-learn
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load dataset
+data = pd.read_csv("titanic.csv")
+
+# Select relevant features
+features = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
+target = "Survived"
+
+data = data[features + [target]]
+
+# Handle missing values
+data["Age"].fillna(data["Age"].median(), inplace=True)
+data["Embarked"].fillna(data["Embarked"].mode()[0], inplace=True)
+
+# Encode categorical variables
+label_encoder = LabelEncoder()
+data["Sex"] = label_encoder.fit_transform(data["Sex"])
+data["Embarked"] = label_encoder.fit_transform(data["Embarked"])
+
+# Split data into features and target
+X = data.drop(target, axis=1)
+y = data[target]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train Logistic Regression model
+model = LogisticRegression(max_iter=200)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate model
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+#SAMPLE OUTPUT:
+Accuracy: 0.78
+
+Classification Report:
+              precision    recall  f1-score   support
+           0       0.81      0.85      0.83
+           1       0.74      0.68      0.71
